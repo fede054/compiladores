@@ -1,5 +1,7 @@
 package entity;
 
+import dto.Vehicle;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
