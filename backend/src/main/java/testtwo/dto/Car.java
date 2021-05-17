@@ -1,4 +1,4 @@
-package dto;
+package testtwo.dto;
 
 public class Car extends Vehicle {
 

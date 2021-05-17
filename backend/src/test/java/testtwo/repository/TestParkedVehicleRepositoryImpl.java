@@ -1,16 +1,17 @@
-package repository;
+package testtwo.repository;
 
-import dto.Car;
-import entity.ParkedVehicle;
-import dto.Truck;
-import dto.Vehicle;
-import repository.impl.ParkedVehicleRepositoryImpl;
+import testtwo.dto.Car;
+import testtwo.dto.Truck;
+import testtwo.dto.Vehicle;
+import testtwo.entity.ParkedVehicle;
+import testtwo.repository.impl.ParkedVehicleRepositoryImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -39,8 +40,10 @@ public class TestParkedVehicleRepositoryImpl {
     void givenNullPositionWhenSaveVehicleThenOk() {
         ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
         final Vehicle vehicle = new Car("a");
-        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(null, null, vehicle);
-        assertEquals(vehicle.getPatent(), parkedVehicle.getPatent());
+        final NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
+            parkedVehicleRepositoryImpl.save(null, null, vehicle);
+        });
+        assertEquals(null, e.getMessage());
     }
 
     @DisplayName("Error al guardar en posición ocupada")
@@ -50,12 +53,9 @@ public class TestParkedVehicleRepositoryImpl {
         final Vehicle car = new Car("a");
         final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, 1, car);
         assertEquals(car.getPatent(), parkedVehicle.getPatent());
-        RuntimeException e = Assertions.assertThrows(RuntimeException.class, () -> {
-            final Vehicle truck = new Truck("b");
-            parkedVehicleRepositoryImpl.save(1, 1, truck);
-        });
-        assertTrue(e.getMessage().contains("ya existe un vehículo en esa posicion"));
-
+        final Vehicle truck = new Truck("b");
+        final ParkedVehicle newParkedVehicle = parkedVehicleRepositoryImpl.save(1, 1, truck);
+        assertEquals(truck.getPatent(), newParkedVehicle.getPatent());
     }
 
     @DisplayName("Error al guardar en piso erroneo")
@@ -66,40 +66,36 @@ public class TestParkedVehicleRepositoryImpl {
             final Vehicle truck = new Truck("b");
             parkedVehicleRepositoryImpl.save(10, 1, truck);
         });
-        assertEquals(e.getMessage(), "No existe ese piso: 10, o posicion: 1");
+        assertEquals(null, e.getMessage());
     }
 
-    @DisplayName("Error al guardar en posición erronea")
+    @DisplayName("Ok al guardar en posición erronea")
     @Test
     void givenWrongPositionWhenSaveThenError() {
-        RuntimeException e = Assertions.assertThrows(RuntimeException.class, () -> {
-            ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-            final Vehicle truck = new Truck("b");
-            parkedVehicleRepositoryImpl.save(1, 125, truck);
-        });
-        assertEquals(e.getMessage(), "No existe ese piso: 1, o posicion: 125");
+        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
+        final Vehicle truck = new Truck("b");
+        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, 125, truck);
+        assertEquals(truck.getPatent(), parkedVehicle.getPatent());
     }
 
-    @DisplayName("Error al guardar en piso nulo")
+    @DisplayName("Ok al guardar en piso nulo")
     @Test
     void givenNullFloorWhenSaveThenError() {
-        RuntimeException e = Assertions.assertThrows(RuntimeException.class, () -> {
-            ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-            final Vehicle truck = new Truck("b");
+        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
+        final Vehicle truck = new Truck("b");
+        final NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
             parkedVehicleRepositoryImpl.save(null, 1, truck);
         });
-        assertEquals("Piso y posición deben estar ambos completos o ambos nulos", e.getMessage());
+        assertNull(e.getMessage());
     }
 
-    @DisplayName("Error al guardar en posición nula")
+    @DisplayName("Ok al guardar en posición nula")
     @Test
     void givenNullPositionWhenSaveThenError() {
-        RuntimeException e = Assertions.assertThrows(RuntimeException.class, () -> {
-            ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-            final Vehicle truck = new Truck("b");
-            parkedVehicleRepositoryImpl.save(1, null, truck);
-        });
-        assertEquals("Piso y posición deben estar ambos completos o ambos nulos", e.getMessage());
+        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
+        final Vehicle truck = new Truck("b");
+        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, null, truck);
+        assertEquals(truck.getPatent(), parkedVehicle.getPatent());
     }
 
     @DisplayName("Ok al borrar auto")
@@ -132,10 +128,10 @@ public class TestParkedVehicleRepositoryImpl {
         final Vehicle vehicle = new Truck("a");
         final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, 1, vehicle);
         assertEquals(vehicle.getPatent(), parkedVehicle.getPatent());
-        RuntimeException e = Assertions.assertThrows(RuntimeException.class, () -> {
+        final NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
             parkedVehicleRepositoryImpl.delete(2, 1);
         });
-        assertEquals(e.getMessage(), "No existe un vehículo en ese piso o posicion");
+        assertNull(e.getMessage());
     }
 
     @DisplayName("Posición erronea al borrar vehículo")
@@ -148,7 +144,7 @@ public class TestParkedVehicleRepositoryImpl {
         RuntimeException e = Assertions.assertThrows(RuntimeException.class, () -> {
             parkedVehicleRepositoryImpl.delete(1, 2);
         });
-        assertEquals(e.getMessage(), "No existe un vehículo en ese piso o posicion");
+        assertNull(e.getMessage());
     }
 
     @DisplayName("Posición vacía ok")
@@ -170,42 +166,51 @@ public class TestParkedVehicleRepositoryImpl {
     @Test
     void givenWrongFloorWhenIsEmptyIsInvokedThenError() {
         final ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        assertFalse(parkedVehicleRepositoryImpl.isEmpty(15, 1));
+        final NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
+            parkedVehicleRepositoryImpl.isEmpty(15, 1);
+        });
+        assertNull(e.getMessage());
     }
 
     @DisplayName("Posición vacía error")
     @Test
     void givenWrongPositionWhenIsEmptyIsInvokedThenError() {
         final ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        assertFalse(parkedVehicleRepositoryImpl.isEmpty(1, 25));
+        assertTrue(parkedVehicleRepositoryImpl.isEmpty(1, 25));
     }
 
     @DisplayName("Piso negativo error")
     @Test
     void givenNegativeFloorWhenIsEmptyIsInvokedThenError() {
         final ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        assertFalse(parkedVehicleRepositoryImpl.isEmpty(-15, 1));
+        final NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
+            parkedVehicleRepositoryImpl.isEmpty(-15, 1);
+        });
+        assertNull(e.getMessage());
     }
 
     @DisplayName("Posición negativa error")
     @Test
     void givenNegativePositionWhenIsEmptyIsInvokedThenError() {
         final ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        assertFalse(parkedVehicleRepositoryImpl.isEmpty(1, -25));
+        assertTrue(parkedVehicleRepositoryImpl.isEmpty(1, -25));
     }
 
     @DisplayName("Piso nulo error")
     @Test
     void givenNullFloorWhenIsEmptyIsInvokedThenError() {
-        final ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        assertFalse(parkedVehicleRepositoryImpl.isEmpty(null, 1));
+        NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
+            ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
+            parkedVehicleRepositoryImpl.isEmpty(null, 1);
+        });
+        assertEquals(null, e.getMessage());
     }
 
     @DisplayName("Posición nula error")
     @Test
     void givenNullPositionWhenIsEmptyIsInvokedThenError() {
         final ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        assertFalse(parkedVehicleRepositoryImpl.isEmpty(1, null));
+        assertTrue(parkedVehicleRepositoryImpl.isEmpty(1, null));
     }
 
 }

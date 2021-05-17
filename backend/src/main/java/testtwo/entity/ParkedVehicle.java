@@ -1,6 +1,6 @@
-package entity;
+package testtwo.entity;
 
-import dto.Vehicle;
+import testtwo.dto.Vehicle;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
