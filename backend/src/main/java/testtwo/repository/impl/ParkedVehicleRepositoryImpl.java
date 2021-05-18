@@ -1,7 +1,7 @@
 package testtwo.repository.impl;
 
 import testtwo.entity.ParkedVehicle;
-import testtwo.dto.Vehicle;
+import testtwo.dto.VehicleDTO;
 import org.javatuples.Pair;
 import org.springframework.stereotype.Component;
 import testtwo.repository.ParkedVehicleRepository;
@@ -23,9 +23,9 @@ public class ParkedVehicleRepositoryImpl implements ParkedVehicleRepository {
 
     private Map<Integer, Map<Integer, ParkedVehicle>> initializeGarage() {
         final Map<Integer, Map<Integer, ParkedVehicle>> toReturn = new HashMap<>();
-        for (int i = 1; i < FLOORS; i++) {
+        for (int i = 1; i <= FLOORS; i++) {
             final HashMap<Integer, ParkedVehicle> toInsert = new HashMap<>();
-            for (int j = 1; j < POSITIONS; j++) {
+            for (int j = 1; j <= POSITIONS; j++) {
                 toInsert.put(j, null);
             }
             toReturn.put(i, toInsert);
@@ -60,9 +60,9 @@ public class ParkedVehicleRepositoryImpl implements ParkedVehicleRepository {
     @Override
     public ParkedVehicle save(final Integer floor,
                               final Integer position,
-                              final Vehicle vehicle) {
+                              final VehicleDTO vehicleDTO) {
         final Map<Integer, ParkedVehicle> temp = this.garage.get(floor);
-        final ParkedVehicle parkedVehicle = new ParkedVehicle(vehicle);
+        final ParkedVehicle parkedVehicle = new ParkedVehicle(vehicleDTO);
         temp.put(position, parkedVehicle);
         return parkedVehicle;
     }

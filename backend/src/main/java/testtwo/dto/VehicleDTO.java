@@ -1,6 +1,6 @@
 package testtwo.dto;
 
-public abstract class Vehicle {
+public abstract class VehicleDTO {
 
     private String patent;
 

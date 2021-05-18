@@ -1,7 +1,7 @@
 package testtwo.service.impl;
 
 import testtwo.entity.ParkedVehicle;
-import testtwo.dto.Vehicle;
+import testtwo.dto.VehicleDTO;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class GarageServiceImpl implements GarageService {
     @Override
     public ParkedVehicle park(final Integer floor,
                               final Integer position,
-                              final Vehicle vehicle) {
+                              final VehicleDTO vehicleDTO) {
         Integer floorToUse = floor;
         Integer positionToUse = position;
         if (floorToUse == null && positionToUse == null) {
@@ -35,7 +35,7 @@ public class GarageServiceImpl implements GarageService {
         validateFieldsNotNegative(floorToUse, positionToUse);
         validateFieldsWithinMaxRange(floorToUse, positionToUse);
         if (this.vehicleRepository.isEmpty(floorToUse, positionToUse)) {
-            return this.vehicleRepository.save(floorToUse, positionToUse, vehicle);
+            return this.vehicleRepository.save(floorToUse, positionToUse, vehicleDTO);
         } else {
             final Pair<Integer, Integer> freePosition = this.vehicleRepository.getFirstEmptyPlace();
             throw new RuntimeException("ya existe un vehículo en esa posicion. La primera posición vacía es piso: "

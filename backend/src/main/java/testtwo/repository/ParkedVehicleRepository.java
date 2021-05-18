@@ -1,7 +1,7 @@
 package testtwo.repository;
 
 import testtwo.entity.ParkedVehicle;
-import testtwo.dto.Vehicle;
+import testtwo.dto.VehicleDTO;
 import org.javatuples.Pair;
 
 public interface ParkedVehicleRepository {
@@ -15,7 +15,7 @@ public interface ParkedVehicleRepository {
 
     public ParkedVehicle save(final Integer floor,
                               final Integer position,
-                              final Vehicle vehicle);
+                              final VehicleDTO vehicleDTO);
 
     public String delete(final Integer floor,
                          final Integer position);
