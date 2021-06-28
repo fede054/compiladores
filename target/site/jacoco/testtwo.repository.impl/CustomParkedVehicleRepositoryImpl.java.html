@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomParkedVehicleRepositoryImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Unidad-1-Test</a> &gt; <a href="index.source.html" class="el_package">testtwo.repository.impl</a> &gt; <span class="el_source">CustomParkedVehicleRepositoryImpl.java</span></div><h1>CustomParkedVehicleRepositoryImpl.java</h1><pre class="source lang-java linenums">package testtwo.repository.impl;
+
+import org.javatuples.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import testtwo.entity.ParkedVehicle;
+import testtwo.repository.CustomParkedVehicleRepository;
+import testtwo.repository.ParkedVehicleRepository;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Component
+public class CustomParkedVehicleRepositoryImpl implements CustomParkedVehicleRepository {
+
+<span class="fc" id="L17">    private static final Integer FLOORS = 4;</span>
+<span class="fc" id="L18">    private static final Integer POSITIONS = 20;</span>
+    private final ParkedVehicleRepository parkedVehicleRepository;
+
+    @Autowired
+<span class="fc" id="L22">    public CustomParkedVehicleRepositoryImpl(@Lazy final ParkedVehicleRepository parkedVehicleRepository) {</span>
+<span class="fc" id="L23">        this.parkedVehicleRepository = parkedVehicleRepository;</span>
+<span class="fc" id="L24">    }</span>
+
+    @Override
+    public Pair&lt;Integer, Integer&gt; getMaxFloorAndPosition() {
+<span class="fc" id="L28">        return new Pair&lt;&gt;(FLOORS, POSITIONS);</span>
+    }
+
+    @Override
+    public boolean isEmpty(final Integer floor, final Integer position) {
+<span class="fc bfc" id="L33" title="All 4 branches covered.">        return (floor != null &amp;&amp; position != null) &amp;&amp;</span>
+<span class="fc bfc" id="L34" title="All 4 branches covered.">                (floor &gt; 0 &amp;&amp; position &gt; 0) &amp;&amp;</span>
+<span class="fc bfc" id="L35" title="All 4 branches covered.">                (floor &lt;= FLOORS &amp;&amp; position &lt;= POSITIONS) &amp;&amp;</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">                !this.parkedVehicleRepository.existsByFloorAndPositionAndExitDateTimeIsNull(floor, position);</span>
+    }
+
+    @Override
+    public Pair&lt;Integer, Integer&gt; getFirstEmptyPlace() {
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        for (int i = 1; i &lt;= FLOORS; i++) {</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">            for (int j = 1; j &lt;= POSITIONS; j++) {</span>
+<span class="fc" id="L43">                final Optional&lt;ParkedVehicle&gt; exists = this.parkedVehicleRepository.findByFloorAndPosition(i, j);</span>
+<span class="pc bpc" id="L44" title="1 of 4 branches missed.">                if (exists.isEmpty() || (exists.get().getExitDateTime() != null)) {</span>
+<span class="fc" id="L45">                    return new Pair&lt;&gt;(i, j);</span>
+                }
+            }
+        }
+<span class="fc" id="L49">        return new Pair&lt;&gt;(null, null);</span>
+    }
+
+    @Override
+    public ParkedVehicle save(final Integer floor, final Integer position, final ParkedVehicle parkedVehicle) {
+<span class="fc" id="L54">        parkedVehicle.setFloor(floor);</span>
+<span class="fc" id="L55">        parkedVehicle.setPosition(position);</span>
+<span class="fc" id="L56">        return this.parkedVehicleRepository.save(parkedVehicle);</span>
+    }
+
+    @Override
+    public String delete(final Integer floor, final Integer position) {
+<span class="fc" id="L61">        final Optional&lt;ParkedVehicle&gt; foundVehicle = this.parkedVehicleRepository.findByFloorAndPositionAndExitDateTimeIsNull(floor, position);</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        if (foundVehicle.isEmpty()) {</span>
+<span class="fc" id="L63">            throw new RuntimeException(&quot;No existe un vehículo en ese piso y posición&quot;);</span>
+        } else {
+<span class="fc" id="L65">            final ParkedVehicle parkedVehicle = foundVehicle.get();</span>
+<span class="fc" id="L66">            final String feeToPay = &quot;El importe a pagar es: $&quot; + parkedVehicle.getFeeToPay();</span>
+<span class="fc" id="L67">            parkedVehicle.setExitDateTime(LocalDateTime.now());</span>
+<span class="fc" id="L68">            this.parkedVehicleRepository.save(parkedVehicle);</span>
+<span class="fc" id="L69">            return feeToPay;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.4.201905082037</span></div></body></html>

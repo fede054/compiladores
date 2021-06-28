@@ -1,0 +1,5 @@
+testtwo\controller\UnParkingControllerTest.class
+testtwo\service\TestGarageServiceImpl.class
+testtwo\controller\ExceptionHandlerAdviceTest.class
+testtwo\controller\ParkingControllerTest.class
+testtwo\repository\TestParkedVehicleCustomRepositoryImpl.class
