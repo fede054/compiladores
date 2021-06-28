@@ -1,49 +1,81 @@
 package testtwo.repository;
 
 import org.javatuples.Pair;
-import testtwo.dto.CarDTO;
-import testtwo.dto.TruckDTO;
-import testtwo.dto.VehicleDTO;
-import testtwo.entity.ParkedVehicle;
-import testtwo.repository.impl.ParkedVehicleRepositoryImpl;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.mockito.stubbing.Answer;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.web.WebAppConfiguration;
+import testtwo.converter.rq.VehicleRqConverter;
+import testtwo.converter.rs.ParkedVehicleRsConverter;
+import testtwo.dto.rq.CarDTO;
+import testtwo.dto.rq.TruckDTO;
+import testtwo.dto.rq.VehicleDTO;
+import testtwo.dto.rs.ParkedVehicleRsDTO;
+import testtwo.entity.ParkedVehicle;
+import testtwo.repository.impl.ParkedVehicleRepositoryCustomImpl;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+@WebAppConfiguration()
+@ExtendWith(SpringExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class TestParkedVehicleCustomRepositoryImpl {
 
-public class TestParkedVehicleRepositoryImpl {
+    private ParkedVehicleRepositoryCustomImpl parkedVehicleRepository;
+    @Mock
+    private ParkedVehicleRepository parkedVehicleRepositoryMocked;
+    @Spy
+    private VehicleRqConverter vehicleRqConverter;
+    @Spy
+    private ParkedVehicleRsConverter parkedVehicleRsConverter;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        this.parkedVehicleRepository = new ParkedVehicleRepositoryCustomImpl(this.parkedVehicleRepositoryMocked, this.vehicleRqConverter, this.parkedVehicleRsConverter);
+    }
 
     @DisplayName("Guardar auto ok")
     @Test
     void whenSaveCarThenOk() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
         final VehicleDTO vehicleDTO = new CarDTO("a");
-        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, 1, vehicleDTO);
+        whenSaveThenReturnModifiedObject();
+        final ParkedVehicleRsDTO parkedVehicle = this.parkedVehicleRepository.save(1, 1, vehicleDTO);
         assertEquals(vehicleDTO.getPatent(), parkedVehicle.getPatent());
     }
 
     @DisplayName("Guardar camioneta ok")
     @Test
     void whenSaveTruckThenOk() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
         final VehicleDTO vehicleDTO = new TruckDTO("a");
-        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, 1, vehicleDTO);
+        whenSaveThenReturnModifiedObject();
+        final ParkedVehicleRsDTO parkedVehicle = this.parkedVehicleRepository.save(1, 1, vehicleDTO);
         assertEquals(vehicleDTO.getPatent(), parkedVehicle.getPatent());
     }
+
 
     @DisplayName("Guardar vehiculo en posición nula ok")
     @Test
     void givenNullPositionWhenSaveVehicleThenOk() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
         final VehicleDTO vehicleDTO = new CarDTO("a");
         final NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
-            parkedVehicleRepositoryImpl.save(null, null, vehicleDTO);
+            this.parkedVehicleRepository.save(null, null, vehicleDTO);
         });
         assertNull(e.getMessage());
     }
@@ -51,17 +83,17 @@ public class TestParkedVehicleRepositoryImpl {
     @DisplayName("Obtener el piso y posición máximo ok")
     @Test
     void whenMaxFloorAndPositionThenOk() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        final Pair<Integer, Integer> emptyPlace = parkedVehicleRepositoryImpl.getMaxFloorAndPosition();
+        final Pair<Integer, Integer> emptyPlace = this.parkedVehicleRepository.getMaxFloorAndPosition();
         assertNotNull(emptyPlace.getValue0());
         assertNotNull(emptyPlace.getValue1());
     }
 
+
     @DisplayName("Obtener el primer lugar vacío ok")
     @Test
     void whenGetFirstEmptyPlaceThenOk() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        final Pair<Integer, Integer> emptyPlace = parkedVehicleRepositoryImpl.getFirstEmptyPlace();
+        when(this.parkedVehicleRepositoryMocked.existByFloorAndPositionAndExitDateTimeIsNull(any(), any())).thenReturn(true);
+        final Pair<Integer, Integer> emptyPlace = this.parkedVehicleRepository.getFirstEmptyPlace();
         assertNotNull(emptyPlace.getValue0());
         assertNotNull(emptyPlace.getValue1());
     }
@@ -69,82 +101,71 @@ public class TestParkedVehicleRepositoryImpl {
     @DisplayName("Obtener el primer lugar vacío error")
     @Test
     void whenGetFirstEmptyPlaceThenError() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        for (int i = 1; i <= 4; i++) {
-            for (int j = 1; j <= 20; j++) {
-                final VehicleDTO vehicleDTO = new CarDTO(i + String.valueOf(j));
-                parkedVehicleRepositoryImpl.save(i, j, vehicleDTO);
-            }
-        }
-        final Pair<Integer, Integer> emptyPlace = parkedVehicleRepositoryImpl.getFirstEmptyPlace();
+        when(this.parkedVehicleRepositoryMocked.existByFloorAndPositionAndExitDateTimeIsNull(any(), any())).thenReturn(false);
+        final Pair<Integer, Integer> emptyPlace = this.parkedVehicleRepository.getFirstEmptyPlace();
         assertNull(emptyPlace.getValue0());
         assertNull(emptyPlace.getValue1());
     }
 
-    @DisplayName("Error al guardar en posición ocupada")
+
+    @DisplayName("Ok al guardar en posición ocupada")
     @Test
-    void givenBusyPositionWhenSaveCarThenThrowError() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        final VehicleDTO car = new CarDTO("a");
-        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, 1, car);
-        assertEquals(car.getPatent(), parkedVehicle.getPatent());
+    void givenBusyPositionWhenSaveCarThenOk() {
         final VehicleDTO truck = new TruckDTO("b");
-        final ParkedVehicle newParkedVehicle = parkedVehicleRepositoryImpl.save(1, 1, truck);
+        whenSaveThenReturnModifiedObject();
+        final ParkedVehicleRsDTO newParkedVehicle = this.parkedVehicleRepository.save(1, 1, truck);
         assertEquals(truck.getPatent(), newParkedVehicle.getPatent());
     }
 
-    @DisplayName("Error al guardar en piso erroneo")
+    @DisplayName("Ok al guardar en piso erroneo")
     @Test
-    void givenWrongFloorWhenSaveThenError() {
-        RuntimeException e = Assertions.assertThrows(RuntimeException.class, () -> {
-            ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-            final VehicleDTO truck = new TruckDTO("b");
-            parkedVehicleRepositoryImpl.save(10, 1, truck);
-        });
-        assertNull(e.getMessage());
+    void givenWrongFloorWhenSaveThenOk() {
+        final VehicleDTO truck = new TruckDTO("b");
+        whenSaveThenReturnModifiedObject();
+        final ParkedVehicleRsDTO newParkedVehicle = this.parkedVehicleRepository.save(1111, 1, truck);
+        assertEquals(truck.getPatent(), newParkedVehicle.getPatent());
     }
 
     @DisplayName("Ok al guardar en posición erronea")
     @Test
     void givenWrongPositionWhenSaveThenError() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
         final VehicleDTO truck = new TruckDTO("b");
-        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, 125, truck);
+        whenSaveThenReturnModifiedObject();
+        final ParkedVehicleRsDTO parkedVehicle = this.parkedVehicleRepository.save(1, 125, truck);
         assertEquals(truck.getPatent(), parkedVehicle.getPatent());
     }
+
 
     @DisplayName("Ok al guardar en piso nulo")
     @Test
     void givenNullFloorWhenSaveThenError() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
         final VehicleDTO truck = new TruckDTO("b");
         final NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
-            parkedVehicleRepositoryImpl.save(null, 1, truck);
+            this.parkedVehicleRepository.save(null, 1, truck);
         });
         assertNull(e.getMessage());
     }
 
+
     @DisplayName("Ok al guardar en posición nula")
     @Test
     void givenNullPositionWhenSaveThenError() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
         final VehicleDTO truck = new TruckDTO("b");
-        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, null, truck);
-        assertEquals(truck.getPatent(), parkedVehicle.getPatent());
+        final NullPointerException e = Assertions.assertThrows(NullPointerException.class, () -> {
+            this.parkedVehicleRepository.save(1, null, truck);
+        });
     }
 
     @DisplayName("Ok al borrar auto")
     @Test
     void whenDeleteCarThenOk() {
-        ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
-        final VehicleDTO vehicleDTO = new CarDTO("a");
-        final ParkedVehicle parkedVehicle = parkedVehicleRepositoryImpl.save(1, 1, vehicleDTO);
-        assertEquals(vehicleDTO.getPatent(), parkedVehicle.getPatent());
-        final String amountToPay = parkedVehicleRepositoryImpl.delete(1, 1);
+        final ParkedVehicle vehicle = ParkedVehicle.builder().entryDateTime(LocalDateTime.now()).patent("a").ratio(2L).build();
+        when(this.parkedVehicleRepositoryMocked.findByFloorAndPositionExitDateTimeIsNull(any(), any())).thenReturn(Optional.of(vehicle));
+        final String amountToPay = this.parkedVehicleRepository.delete(1, 1);
         assertTrue(amountToPay.contains("El importe a pagar es: $"));
     }
 
-
+    /*
     @DisplayName("Ok al borrar camioneta")
     @Test
     void whenDeleteTruckThenOk() {
@@ -246,6 +267,15 @@ public class TestParkedVehicleRepositoryImpl {
     void givenNullPositionWhenIsEmptyIsInvokedThenError() {
         final ParkedVehicleRepositoryImpl parkedVehicleRepositoryImpl = new ParkedVehicleRepositoryImpl();
         assertTrue(parkedVehicleRepositoryImpl.isEmpty(1, null));
+    }
+*/
+
+    private void whenSaveThenReturnModifiedObject() {
+        when(this.parkedVehicleRepositoryMocked.save(any(ParkedVehicle.class))).thenAnswer((Answer<ParkedVehicle>) invocation -> {
+            final ParkedVehicle vehicle = (ParkedVehicle) invocation.getArguments()[0];
+            vehicle.setId(1L);
+            return vehicle;
+        });
     }
 
 }

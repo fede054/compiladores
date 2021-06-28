@@ -14,9 +14,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import testtwo.dto.CarDTO;
-import testtwo.dto.VehicleDTO;
-import testtwo.entity.ParkedVehicle;
 import testtwo.service.GarageService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

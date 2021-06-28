@@ -1,6 +1,5 @@
 package testtwo.controller;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,15 +15,13 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import testtwo.dto.CarDTO;
-import testtwo.dto.TruckDTO;
-import testtwo.dto.VehicleDTO;
-import testtwo.entity.ParkedVehicle;
+import testtwo.dto.rq.CarDTO;
+import testtwo.dto.rq.TruckDTO;
+import testtwo.dto.rq.VehicleDTO;
+import testtwo.dto.rs.ParkedVehicleRsDTO;
 import testtwo.service.GarageService;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,7 +39,7 @@ public class ParkingControllerTest {
 
     private MockMvc mockMvc;
 
-    @BeforeAll
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         this.mockMvc = MockMvcBuilders
@@ -53,7 +50,7 @@ public class ParkingControllerTest {
     @Test
     public void parkCar() throws Exception {
         final VehicleDTO car = new CarDTO("abc123");
-        final ParkedVehicle parkedVehicle = new ParkedVehicle(car);
+        final ParkedVehicleRsDTO parkedVehicle = ParkedVehicleRsDTO.builder().patent(car.getPatent()).build();
         when(this.garageService.park(1, 1, car)).thenReturn(parkedVehicle);
         final MvcResult result = mockMvc
                 .perform(post("/park/car")
@@ -63,13 +60,13 @@ public class ParkingControllerTest {
                         .param("position", "1")
                         .content("{\"patent\": \"abc123\"}"))
                 .andExpect(status().isOk()).andReturn();
-        assertTrue(result.getResponse().getContentAsString().contains("abc123"));
+        assertTrue(result.getResponse().getContentAsString().contains(car.getPatent()));
     }
 
     @Test
     public void parkTruck() throws Exception {
         final VehicleDTO truck = new TruckDTO("abc123");
-        final ParkedVehicle parkedVehicle = new ParkedVehicle(truck);
+        final ParkedVehicleRsDTO parkedVehicle = ParkedVehicleRsDTO.builder().patent(truck.getPatent()).build();
         when(this.garageService.park(1, 2, truck)).thenReturn(parkedVehicle);
         final MvcResult result = mockMvc
                 .perform(post("/park/truck")

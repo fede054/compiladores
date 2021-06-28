@@ -1,23 +1,18 @@
 package testtwo.repository;
 
-import testtwo.entity.ParkedVehicle;
-import testtwo.dto.VehicleDTO;
 import org.javatuples.Pair;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import testtwo.dto.rq.VehicleDTO;
+import testtwo.entity.ParkedVehicle;
 
-public interface ParkedVehicleRepository {
+import java.util.Optional;
 
-    public Pair<Integer, Integer> getMaxFloorAndPosition();
+@Repository
+public interface ParkedVehicleRepository extends JpaRepository<ParkedVehicle, Long>, ParkedVehicleRepositoryCustom {
 
-    public boolean isEmpty(final Integer floor,
-                           final Integer position);
+    public boolean existByFloorAndPositionAndExitDateTimeIsNull(final Integer floor, final Integer position);
 
-    public Pair<Integer, Integer> getFirstEmptyPlace();
-
-    public ParkedVehicle save(final Integer floor,
-                              final Integer position,
-                              final VehicleDTO vehicleDTO);
-
-    public String delete(final Integer floor,
-                         final Integer position);
+    public Optional<ParkedVehicle> findByFloorAndPositionExitDateTimeIsNull(final Integer floor, final Integer position);
 
 }

@@ -1,4 +1,4 @@
-package testtwo.dto;
+package testtwo.dto.rq;
 
 public abstract class VehicleDTO {
 

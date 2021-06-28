@@ -1,15 +1,15 @@
-package testtwo.dto;
+package testtwo.dto.rq;
 
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-public class CarDTO extends VehicleDTO {
+public class TruckDTO extends VehicleDTO {
 
-    private static final Long RATIO = 10L;
+    private static final Long RATIO = 15L;
 
-    public CarDTO(final String patent) {
+    public TruckDTO(final String patent) {
         super();
         super.setPatent(patent);
     }

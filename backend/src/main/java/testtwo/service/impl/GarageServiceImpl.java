@@ -1,7 +1,7 @@
 package testtwo.service.impl;
 
-import testtwo.entity.ParkedVehicle;
-import testtwo.dto.VehicleDTO;
+import testtwo.dto.rs.ParkedVehicleRsDTO;
+import testtwo.dto.rq.VehicleDTO;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,21 +11,21 @@ import testtwo.service.GarageService;
 @Service
 public class GarageServiceImpl implements GarageService {
 
-    private final ParkedVehicleRepository vehicleRepository;
+    private final ParkedVehicleRepository parkedVehicleRepository;
 
     @Autowired
-    public GarageServiceImpl(final ParkedVehicleRepository vehicleRepository) {
-        this.vehicleRepository = vehicleRepository;
+    public GarageServiceImpl(final ParkedVehicleRepository parkedVehicleRepository) {
+        this.parkedVehicleRepository = parkedVehicleRepository;
     }
 
     @Override
-    public ParkedVehicle park(final Integer floor,
-                              final Integer position,
-                              final VehicleDTO vehicleDTO) {
+    public ParkedVehicleRsDTO park(final Integer floor,
+                                   final Integer position,
+                                   final VehicleDTO vehicleDTO) {
         Integer floorToUse = floor;
         Integer positionToUse = position;
         if (floorToUse == null && positionToUse == null) {
-            final Pair<Integer, Integer> freePosition = this.vehicleRepository.getFirstEmptyPlace();
+            final Pair<Integer, Integer> freePosition = this.parkedVehicleRepository.getFirstEmptyPlace();
             if (freePosition.getValue0() == null || freePosition.getValue1() == null) {
                 throw new RuntimeException("No existe lugar disponible para estacionar");
             }
@@ -34,10 +34,10 @@ public class GarageServiceImpl implements GarageService {
         }
         validateFieldsNotNegative(floorToUse, positionToUse);
         validateFieldsWithinMaxRange(floorToUse, positionToUse);
-        if (this.vehicleRepository.isEmpty(floorToUse, positionToUse)) {
-            return this.vehicleRepository.save(floorToUse, positionToUse, vehicleDTO);
+        if (this.parkedVehicleRepository.isEmpty(floorToUse, positionToUse)) {
+            return this.parkedVehicleRepository.save(floorToUse, positionToUse, vehicleDTO);
         } else {
-            final Pair<Integer, Integer> freePosition = this.vehicleRepository.getFirstEmptyPlace();
+            final Pair<Integer, Integer> freePosition = this.parkedVehicleRepository.getFirstEmptyPlace();
             throw new RuntimeException("ya existe un vehículo en esa posicion. La primera posición vacía es piso: "
                     + freePosition.getValue0() + ", posición: " + freePosition.getValue1());
         }
@@ -49,8 +49,8 @@ public class GarageServiceImpl implements GarageService {
         validateFieldsNotNull(floor, position);
         validateFieldsNotNegative(floor, position);
         validateFieldsWithinMaxRange(floor, position);
-        if (!this.vehicleRepository.isEmpty(floor, position)) {
-            return this.vehicleRepository.delete(floor, position);
+        if (!this.parkedVehicleRepository.isEmpty(floor, position)) {
+            return this.parkedVehicleRepository.delete(floor, position);
         } else {
             throw new RuntimeException("No se puede remover un vehículo del piso o posición indicado");
         }
@@ -72,7 +72,7 @@ public class GarageServiceImpl implements GarageService {
 
     private void validateFieldsWithinMaxRange(final Integer floor,
                                               final Integer position) {
-        final Pair<Integer, Integer> maxFloorAndPosition = this.vehicleRepository.getMaxFloorAndPosition();
+        final Pair<Integer, Integer> maxFloorAndPosition = this.parkedVehicleRepository.getMaxFloorAndPosition();
         if (floor > maxFloorAndPosition.getValue0() || position > maxFloorAndPosition.getValue1()) {
             throw new RuntimeException("Piso o posición inválida");
         }
