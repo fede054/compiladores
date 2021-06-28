@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "1e33e7ce-d494-4af5-a607-c54f2869b069",
+		"name": "Compiladores",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Park car",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"patent\": \"aaa111\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{basepath}}/api/park/car?floor=1&position=1",
+					"protocol": "http",
+					"host": [
+						"{{basepath}}"
+					],
+					"path": [
+						"api",
+						"park",
+						"car"
+					],
+					"query": [
+						{
+							"key": "floor",
+							"value": "1"
+						},
+						{
+							"key": "position",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Park truck",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"patent\": \"aaa111\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{basepath}}/api/park/truck?floor=1&position=2",
+					"protocol": "http",
+					"host": [
+						"{{basepath}}"
+					],
+					"path": [
+						"api",
+						"park",
+						"truck"
+					],
+					"query": [
+						{
+							"key": "floor",
+							"value": "1"
+						},
+						{
+							"key": "position",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unpark vehicle",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"patent\": \"aaa111\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://{{basepath}}/api/unpark?floor=1&position=1",
+					"protocol": "http",
+					"host": [
+						"{{basepath}}"
+					],
+					"path": [
+						"api",
+						"unpark"
+					],
+					"query": [
+						{
+							"key": "floor",
+							"value": "1"
+						},
+						{
+							"key": "position",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "basepath",
+			"value": "localhost:8080"
+		}
+	]
+}
